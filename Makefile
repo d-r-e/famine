@@ -3,7 +3,7 @@ SRC=src/main.c
 INC=inc/$(NAME).h
 OBJ = $(SRC:.c=.o)
 BRANCH = main
-FLAGS= -Wall -Wextra -Werror -Wformat-security -fsanitize=address
+FLAGS= -Wall -Wextra -Werror -fsanitize=address
 
 $(NAME): $(OBJ)
 	gcc $(FLAGS) $(OBJ) -o $(NAME)
@@ -22,7 +22,7 @@ re: fclean all
 all: $(NAME)
 
 add: fclean
-	git add .gitignore Makefile $(SRC) $(INC) Dockerfile
+	git add .gitignore Makefile $(SRC) $(INC) Dockerfile .devcontainer
 
 commit: add
 	git commit -m "darodrig"
