@@ -9,4 +9,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
-#define debug(...) \    do { if (DEBUG)      dprintf(2,"DRIVER_NAME:");    dprintf(2, __VA_ARGS__);    dprintf(2, "\n");   } while (0)
+#ifndef DEBUG
+# define DEBUG 0
+#endif
+#define debug_print(fmt, ...) \
+        do { if (DEBUG)  fprintf(stderr, "\e[94m%s:\e%d:%s():\e[39m " fmt"\n", __FILE__, __LINE__, __func__, __VA_ARGS__); } while (0)

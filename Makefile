@@ -3,7 +3,7 @@ SRC=src/main.c
 INC=inc/$(NAME).h
 OBJ = $(SRC:.c=.o)
 BRANCH = main
-FLAGS= -Wall -Wextra -Werror -fsanitize=address
+FLAGS= -Wall -Wextra -Werror -Wformat-security -DDEBUG=1 -fsanitize=address
 
 $(NAME): $(OBJ)
 	gcc $(FLAGS) $(OBJ) -o $(NAME)

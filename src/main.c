@@ -1,7 +1,6 @@
 #include "../inc/famine.h"
 
 
-
 int main(int argc, char **argv)
 {
     DIR *test;
@@ -15,12 +14,12 @@ int main(int argc, char **argv)
     {
         closedir(test);
     } else
-        dprintf(2, "error opening /tmp/test folder.\n");
+        debug_print("%s", "test folder not found");
     test2 = opendir("/tmp/test2");
     if (test2)
     {
         closedir(test2);
     } else 
-        dprintf(2, "error opening /tmp/test2 folder.\n");
+        dprintf(2, "error opening /tmp/test2 folder");
 
 }
