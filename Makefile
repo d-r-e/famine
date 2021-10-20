@@ -1,7 +1,7 @@
 NAME=famine
 SRC=src/main.c
 OBJ = $(SRC:.c=.o)
-BRANCH = master
+BRANCH = main
 FLAGS= -Wall -Wextra -Werror -Wformat-security -fsanitize=address
 $(NAME): $(OBJ)
 	gcc $(FLAGS) $(OBJ) -o $(NAME)
