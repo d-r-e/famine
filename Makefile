@@ -4,6 +4,7 @@ INC=inc/$(NAME).h
 OBJ = $(SRC:.c=.o)
 BRANCH = main
 FLAGS= -Wall -Wextra -Werror -Wformat-security -fsanitize=address
+
 $(NAME): $(OBJ)
 	gcc $(FLAGS) $(OBJ) -o $(NAME)
 
