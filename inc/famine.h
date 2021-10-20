@@ -12,5 +12,5 @@
 #ifndef DEBUG
 # define DEBUG 0
 #endif
-#define debug_print(fmt, ...) \
+#define debug(fmt, ...) \
         do { if (DEBUG)  fprintf(stderr, "\e[94m%s:\e%d:%s():\e[39m " fmt"\n", __FILE__, __LINE__, __func__, __VA_ARGS__); } while (0)

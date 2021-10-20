@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     {
         closedir(test);
     } else
-        debug_print("%s", "test folder not found");
+        debug("%s", "test folder not found");
     test2 = opendir("/tmp/test2");
     if (test2)
     {
