@@ -1,5 +1,5 @@
 NAME=famine
-SRC=src/main.c src/libft.c  src/files.c src/libelf.c src/famine.c
+SRC=src/main.c src/libft.c  src/files.c src/libelf.c 
 INC=inc/$(NAME).h inc/libft.h
 OBJ = $(SRC:.c=.o)
 OTHERF = Makefile README.md .gitignore .devcontainer
