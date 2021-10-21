@@ -1,6 +1,6 @@
 NAME=famine
-SRC=src/main.c
-INC=inc/$(NAME).h
+SRC=src/main.c src/libft.c
+INC=inc/$(NAME).h inc/libft.h
 OBJ = $(SRC:.c=.o)
 OTHERF = Makefile Dockerfile README.md .gitignore .devcontainer
 BRANCH = main
