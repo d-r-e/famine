@@ -2,7 +2,7 @@
 
 /**
  * @brief 
- * opens a file and applies a function to its file descriptor
+ * open a file and applies a function to its file descriptor
  * @param filepath 
  * @param f function to apply
  * @return int -1 if error or the return value of the applied function

@@ -5,10 +5,11 @@ OBJ = $(SRC:.c=.o)
 OTHERF = Makefile Dockerfile README.md .gitignore .devcontainer
 BRANCH = main
 DEBUG = 1
+CC= gcc
 FLAGS= -Wall -Wextra -Werror -Wformat-security -DDEBUG=$(DEBUG) -fsanitize=address
 
 $(NAME): $(OBJ)
-	gcc $(FLAGS) $(OBJ) -o $(NAME)
+	$(CC) $(FLAGS) $(OBJ) -o $(NAME)
 
 %.o: %.c $(INC)
 		gcc $(FLAGS) -c -o $@ $<
@@ -32,6 +33,8 @@ commit: add
 push: commit
 	git push origin $(BRANCH)
 
+v: $(NAME)
+	valgrind ./$(NAME)
 x: $(NAME)
 	./$(NAME)
 .PHONY: all re clean fclean add commit push

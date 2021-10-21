@@ -1,6 +1,28 @@
 #include "../inc/famine.h"
 
 /**
+ * @brief find strtab index section
+ * 
+ * @param mem mmap'd pointer
+ * @param filesize size of the executable
+ * @return Elf64_Section index of strtab section in the file or -1 if not found
+ */
+Elf64_Section find_strtab(void *mem, size_t filesize)
+{
+    Elf64_Ehdr *hdr = mem;
+    Elf64_Shdr *shdr = (Elf64_Shdr *)&hdr->e_shoff;
+
+    if (hdr->e_shoff + shdr->sh_entsize * hdr->e_shnum > filesize)
+        return (-1);
+    for (uint i = 0; i < hdr->e_shnum; ++i)
+    {
+        if (shdr[i].sh_type == SHT_STRTAB)
+            return (i);
+    }
+    return (-1);
+}
+
+/**
  * @brief checks if a mmapped address corresponds to an elf 64 executable
  * 
  * @param mem 
