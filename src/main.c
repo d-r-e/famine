@@ -63,11 +63,8 @@ void handle_folder(const char *path, int (*f)(int), int mode)
         mkdir(path, mode);
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-    if (argc != 1)
-        return (-1);
-    (void)argv;
     handle_folder("/tmp/test/", famine, 0644);
     // handle_folder("/tmp/test2", &ft_puts);
 }
