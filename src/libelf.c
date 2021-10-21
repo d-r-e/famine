@@ -1,5 +1,11 @@
 #include "../inc/famine.h"
 
+size_t add_str_to_strtab(const char *s, void *mem, size_t filesize)
+{
+    (void)mem;
+    return (filesize + ft_strlen(s));
+}
+
 /**
  * @brief find strtab index section
  * 
