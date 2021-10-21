@@ -35,7 +35,7 @@ Elf64_Off find_strtab(void *mem, size_t filesize)
         debug("%s", "size overflow: corrupted file");
         return(-1);
     }
-    for (uint i = 0; i < hdr->e_shnum; ++i)
+    for (Elf64_Section i = 0; i < hdr->e_shnum; ++i)
     {
         if (shdr[i].sh_type == SHT_STRTAB)
         {
