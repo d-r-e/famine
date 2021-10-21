@@ -2,6 +2,7 @@ NAME=famine
 SRC=src/main.c
 INC=inc/$(NAME).h
 OBJ = $(SRC:.c=.o)
+OTHERF = Makefile Dockerfile README.md .gitignore .devcontainer
 BRANCH = main
 DEBUG = 1
 FLAGS= -Wall -Wextra -Werror -Wformat-security -DDEBUG=$(DEBUG) -fsanitize=address
@@ -23,7 +24,7 @@ re: fclean all
 all: $(NAME)
 
 add: fclean
-	git add .gitignore Makefile $(SRC) $(INC) Dockerfile .devcontainer
+	git add $(SRC) $(INC) $(OTHERF)
 
 commit: add
 	git commit -m "darodrig"
