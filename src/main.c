@@ -1,11 +1,27 @@
 #include "../inc/famine.h"
 
+/**
+ * @brief injects a string in the strtab on an ELF64 file
+ * 
+ * @param fd previously opened file descriptor
+ * @return int 0 if success, a negative value if error
+ */
 int famine(int fd)
 {
     struct stat s;
+    void *mem = NULL;
 
-    fstat(fd, &s);
-    debug("%lu", s.st_size);
+    if (fstat(fd, &s) < 0 || (size_t)s.st_size <= sizeof(Elf64_Ehdr))
+        return (-1);
+    mem = mmap(mem, s.st_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0);
+    if (mem == MAP_FAILED)
+    {
+        debug("fd %i: %s", fd, "map failed");
+        return (-1);
+    }
+    if (is_elf_64(mem, s.st_size))
+        debug("%s", "elf");
+    munmap(mem, s.st_size);
     return 0;
 }
 
