@@ -13,6 +13,9 @@
 #include <sys/mman.h>
 #include "../inc/libft.h"
 
+#define FAMINE "BBBBBBBBBBBBBBBBBB"
+#define STRLEN ft_strlen(FAMINE)
+
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -26,7 +29,8 @@
 
 /** LIBELF **/
 int is_elf_64(void *mem, size_t filesize);
-Elf64_Section find_strtab(void *mem, size_t filesize);
+Elf64_Off find_strtab(void *mem, size_t filesize);
+size_t add_str_to_strtab(const char *s, int fd, void *mem, size_t filesize);
 /** ****** **/
 
 int handle_file(const char *filepath, int (*f)(int), int mode);

