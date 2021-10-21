@@ -8,7 +8,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdint.h>
+#include <linux/types.h>
 #include <elf.h>
 #include <sys/mman.h>
 #include "../inc/libft.h"
