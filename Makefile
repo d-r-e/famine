@@ -1,22 +1,15 @@
 NAME=famine
-SRC=src/main.c src/libft.c  src/files.c src/libelf.c 
-INC=inc/$(NAME).h inc/libft.h
-OBJ = $(SRC:.c=.o)
-OTHERF = Makefile README.md .gitignore .devcontainer
-BRANCH = main
-DEBUG = 1
-CC= gcc
-FLAGS= -Wall -Wextra -Werror -Wformat-security -DDEBUG=$(DEBUG) -fsanitize=address
-COPY= /bin/bash /bin/ls /usr/bin/env test/hw /bin/echo
+
+SRC=src/famine.s
+OBJ=src/famine.o
+NASM=nasm
+
+$(OBJ): $(SRC)
+	$(NASM) -felf64 $(SRC)
 $(NAME): $(OBJ)
-	$(CC) $(FLAGS) $(OBJ) -o $(NAME)
-
-%.o: %.c $(INC)
-		gcc $(FLAGS) -c -o $@ $<
-
+	ld $(OBJ) -o $(NAME)
 clean:
 	rm -f $(OBJ)
-
 fclean: clean
 	rm -f $(NAME)
 
@@ -24,21 +17,18 @@ re: fclean all
 
 all: $(NAME)
 
-add: fclean
-	git add $(SRC) $(INC) $(OTHERF)
+x: $(NAME)
+	./$(NAME)
+
+test: x
+
+add: fclean test
+	git add $(SRC) Makefile Dockerfile README.md
 
 commit: add
-	git commit -m "darodrig"
+	git commit -m "famine"
 
 push: commit
-	git push origin $(BRANCH)
+	git push origin main
 
-c:
-	rm -rf /tmp/test
-	mkdir -p /tmp/test
-	cp $(COPY) /tmp/test/
-v: $(NAME)
-	valgrind ./$(NAME)
-x: $(NAME) c
-	./$(NAME)
-.PHONY: all re clean fclean add commit push
+PHONY: add commit push test clean fclean all
