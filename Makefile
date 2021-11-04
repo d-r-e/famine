@@ -24,7 +24,7 @@ x: $(NAME)
 test: x
 
 add: test fclean 
-	git add $(SRC) Makefile Dockerfile README.md
+	git add $(SRC) Makefile README.md
 
 commit: add
 	git commit -m "famine"
