@@ -10,6 +10,7 @@ $(NAME): $(OBJ)
 	ld $(OBJ) -o $(NAME)
 clean:
 	rm -f $(OBJ)
+
 fclean: clean
 	rm -f $(NAME)
 
