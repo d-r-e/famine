@@ -23,7 +23,7 @@ x: $(NAME)
 
 test: x
 
-add: re test fclean
+add: test fclean 
 	git add $(SRC) Makefile Dockerfile README.md
 
 commit: add
