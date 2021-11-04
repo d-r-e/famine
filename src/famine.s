@@ -12,10 +12,10 @@
 %define SYS_SYNC         162
 
 section .text
-    global _start
+	global _start
 _start:
-    call exit
+	call exit
 exit:
-    mov rax, SYS_EXIT
-    mov rdi, 0
-    syscall
+	mov rax, SYS_EXIT
+	mov rdi, 0
+	syscall

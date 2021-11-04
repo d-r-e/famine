@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "famine.h": "c",
+        "debug.h": "c",
+        "elf.h": "c",
+        "types.h": "c"
+    }
+}
