@@ -21,6 +21,9 @@ section .text
 	global _start
 _start:
 	mov r14, argv0 ;save program name
+	mov r15, rsp
+	mov rdi, r14
+	call putstr
 	call exit
 putstr:
 	call strlen
