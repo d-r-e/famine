@@ -99,19 +99,26 @@ file_loop:
 	jne .continue
 	.continue:
 		mov rdi, r14
-		call putstr
+		call puts
 		pop rcx
 		add cx, word [rcx + r15 + 416]
 		cmp rcx, qword [r15 + 350]
 		jne file_loop
 	call exit
-putstr:
+puts:
 	call strlen
 	mov rdx, rax		;strlen
 	mov rsi, rdi		;buff
 	mov rdi, 1			;fd
 	mov rax, SYS_WRITE	;syscall
 	syscall
+	push `\n`
+	mov rsi, rsp
+	mov rdx, 1
+	mov rdi, 1
+	mov rax, SYS_WRITE
+	syscall
+	pop rsi
 	ret
 
 strlen:
