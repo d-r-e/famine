@@ -58,18 +58,18 @@
 section .text
 	global _start
 _start:
-	mov r14, [rsp + 8]                                          ; saving argv0 to r14
+    mov r14, [rsp + 8]                                          ; saving argv0 to r14
     push rdx
     push rsp
     sub rsp, 5000                                               ; reserving 5000 bytes
-    mov r15, rsp 
+    mov r15, rsp  
 	call dirent
 	call exit
 dirent:
-	push "."
-	mov rdi, rsp
+	push "/tmp/"                                                ; pushing "." to stack (rsp)
+	mov rdi, rsp                                            ; moving "." to rdi
 	mov rsi, O_RDONLY
-	mov rdx, 0
+	xor rdx, rdx                                            ; not using any flags
 	mov rax, SYS_OPEN
 	syscall
 
@@ -83,8 +83,8 @@ dirent:
 	mov rax, SYS_GETDENTS64
 	syscall   
 
-	test rax, rax
-	js err
+	cmp rax, 0
+	jle err
 
 	mov qword [r15 + 350], rax
 	mov rax, SYS_CLOSE
@@ -92,18 +92,24 @@ dirent:
 	
 	xor rcx, rcx
 for_each_file:
-	; call exit
 	push rcx
-
+	push rdi
+	push rcx
+	mov rdi, r14
+	call puts
+	pop rcx
+	pop rdi
 	cmp byte [r15 + 418 + rcx], DT_REG
 	jne .continue
 	.continue:
-		mov rdi, r14
-		call puts
 		pop rcx
 		add cx, word [rcx + r15 + 416]
 		cmp rcx, qword [r15 + 350]
 		jne for_each_file
+	cleanup:
+    add rsp, 5000                                               ; restoring stack so host process can run normally, this also could use some improvement
+    ; pop rsp
+    ; pop rdx
 	call exit
 puts:
 	call strlen
