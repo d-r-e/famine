@@ -112,7 +112,7 @@ puts:
 	mov rdi, 1			;fd
 	mov rax, SYS_WRITE	;syscall
 	syscall
-	push `\n`
+	push 0xa
 	mov rsi, rsp
 	mov rdx, 1
 	mov rdi, 1
