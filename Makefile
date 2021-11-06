@@ -1,13 +1,13 @@
 NAME=famine
-
 SRC=src/famine.s
 OBJ=src/famine.o
 NASM=nasm
 
-$(OBJ): $(SRC)
-	$(NASM) -felf64 $(SRC)
 $(NAME): $(OBJ)
 	ld $(OBJ) -o $(NAME)
+
+$(OBJ): $(SRC)
+	$(NASM) -felf64 -g $(SRC)
 clean:
 	rm -f $(OBJ)
 
