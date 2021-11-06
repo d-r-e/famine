@@ -11,3 +11,5 @@
 [Nice example](https://www.guitmz.com/linux-midrashim-elf-virus/)
 
 [Another PT_NOTE explanation](https://tmpout.sh/1/2.html)
+
+[In spanish](https://tmpout.sh/1/es/2.html)

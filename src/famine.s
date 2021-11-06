@@ -94,12 +94,15 @@ load_dir:
 file_loop:
 	call exit
 	push rcx
+
 	cmp byte [r15 + 418 + rcx], DT_REG
 	jne .continue
 
 	.continue:
+		; mov rdi, qword [rcx + 419 + r15]
+		; call putstr
 		pop rcx
-		add cx, word [rcx + 15 + 416]
+		add cx, word [rcx + r15 + 416]
 		cmp rcx, qword [r15 + 350]
 		jne file_loop
 	call exit
