@@ -63,9 +63,9 @@ _start:
     push rsp
     sub rsp, 5000                                               ; reserving 5000 bytes
     mov r15, rsp 
-	call load_dir
+	call dirent
 	call exit
-load_dir:
+dirent:
 	push "."
 	mov rdi, rsp
 	mov rsi, O_RDONLY
@@ -91,7 +91,7 @@ load_dir:
 	syscall
 	
 	xor rcx, rcx
-file_loop:
+for_each_file:
 	; call exit
 	push rcx
 
@@ -103,7 +103,7 @@ file_loop:
 		pop rcx
 		add cx, word [rcx + r15 + 416]
 		cmp rcx, qword [r15 + 350]
-		jne file_loop
+		jne for_each_file
 	call exit
 puts:
 	call strlen
