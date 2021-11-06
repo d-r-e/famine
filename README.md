@@ -9,3 +9,5 @@
 [PT_NOTE to PT_LOAD](https://www.symbolcrash.com/2019/03/27/pt_note-to-pt_load-injection-in-elf/)
 
 [Nice example](https://www.guitmz.com/linux-midrashim-elf-virus/)
+
+[Another PT_NOTE explanation](https://tmpout.sh/1/2.html)
