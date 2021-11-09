@@ -20,6 +20,8 @@ all: $(NAME)
 
 x: $(NAME)
 	./$(NAME)
+s: $(NAME)
+	strace ./$(NAME)
 
 test: x
 
