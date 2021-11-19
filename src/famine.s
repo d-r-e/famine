@@ -67,9 +67,12 @@ _start:
     push rsp
     sub rsp, 5000                                               ; reserving 5000 bytes
     mov r15, rsp  
+	call set_folder_chdir
+	chdir:
+		pop rdi
+		mov rax, 80
+		syscall
 	call set_folder ;/tmp/test
-	call set_folder2
-	call exit
 	dirent:                                            ; pushing "." to stack (rsp)
 		pop rdi                                           ; moving "." to rdi
 		mov rsi, O_RDONLY
@@ -304,6 +307,9 @@ print_dot:
 	ret
 set_folder:
 	call dirent
+	db ".", 0
+set_folder_chdir:
+	call chdir
 	db `/tmp/test\0`
 set_folder2:
 	call dirent
