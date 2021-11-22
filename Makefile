@@ -22,7 +22,11 @@ all: $(NAME)
 x: $(NAME)
 	./$(NAME)
 s: $(NAME)
-	strace ./$(NAME)
+	mkdir -p /tmp/test
+	cp /bin/echo /tmp/test/echo
+	strace -x ./$(NAME)
+ss: s
+	binwalk -W /tmp/test/echo /bin/echo | less
 
 test: x
 
