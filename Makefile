@@ -28,7 +28,7 @@ s: $(NAME)
 ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
 se: s
-	/tmp/test/echo -e "\034mFAMINE"
+	/tmp/test/echo -e "\033[0;33mFAMINE\033[0m"
 
 test: x
 

