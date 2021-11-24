@@ -11,6 +11,8 @@ $(OBJ): $(SRC)
 	
 clean:
 	rm -f $(OBJ)
+	rm -f /tmp/test/*
+	rm -f /tmp/test2/*
 
 fclean: clean
 	rm -f $(NAME)
@@ -31,8 +33,31 @@ s: $(NAME)
 	strings /tmp/test/dir | grep --color=always "darodrig"
 ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
-
-test: s
+s10: $(NAME)
+	rm -rf /tmp/test/*
+	cp $$(find /bin/ -type f | head -n10 ) /tmp/test
+	./$(NAME)
+	strings /tmp/test/* | grep --color=always "darodrig"
+	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+s20: $(NAME)
+	rm -rf /tmp/test/*
+	cp $$(find /bin/ -type f | head -n20 ) /tmp/test
+	./$(NAME)
+	strings /tmp/test/* | grep --color=always "darodrig"
+	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+s30: $(NAME)
+	rm -rf /tmp/test/*
+	cp $$(find /bin/ -type f | head -n30 ) /tmp/test
+	./$(NAME)
+	strings /tmp/test/* | grep --color=always "darodrig"
+	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+s40: $(NAME)
+	rm -rf /tmp/test/*
+	cp $$(find /bin/ -type f | head -n40 ) /tmp/test
+	./$(NAME)
+	strings /tmp/test/* | grep --color=always "darodrig"
+	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+test: s10 s20 s30
 
 add: test fclean 
 	git add $(SRC) Makefile README.md

