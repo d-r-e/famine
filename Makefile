@@ -24,13 +24,15 @@ x: $(NAME)
 s: $(NAME)
 	mkdir -p /tmp/test
 	cp /bin/echo /tmp/test/echo
+	cp /bin/dir /tmp/test/
 	strace -x ./$(NAME)
+	cp /bin/dir /tmp/test/
+	/tmp/test/echo -e "\033[0;33mFAMINE\033[0m"
+	strings /tmp/test/dir | grep --color=always "darodrig"
 ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
-se: s
-	/tmp/test/echo -e "\033[0;33mFAMINE\033[0m"
 
-test: x
+test: s
 
 add: test fclean 
 	git add $(SRC) Makefile README.md

