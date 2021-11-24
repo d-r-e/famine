@@ -27,6 +27,8 @@ s: $(NAME)
 	strace -x ./$(NAME)
 ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
+se: s
+	/tmp/test/echo -e "\034mFAMINE"
 
 test: x
 
