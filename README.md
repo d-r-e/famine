@@ -1,4 +1,4 @@
-# Famine: unix worm: educational-purposed malware
+# Famine: silent binary infection
 
 ## Some useful stuff
 
