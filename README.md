@@ -1,5 +1,4 @@
-N
-famine (work in progress)
+# Famine: unix worm: educational-purposed malware
 
 ## Some useful stuff
 
