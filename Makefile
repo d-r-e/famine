@@ -61,6 +61,12 @@ s40: $(NAME) clean
 	./$(NAME)
 	strings /tmp/test/* | grep --color=always "darodrig"
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+overload: $(NAME)
+	cp $$(find /bin/ -type f) /tmp/test
+	./$(NAME)
+	cp $$(find /bin/ -type f) /tmp/test2
+	/tmp/test/echo overloading
+	strings /tmp/test2/* | grep --color=always "darodrig"
 test: s10 s20 s30
 
 add: clean test fclean 
