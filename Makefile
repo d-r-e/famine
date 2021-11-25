@@ -63,7 +63,7 @@ s40: $(NAME)
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
 test: s10 s20 s30
 
-add: test fclean 
+add: clean test fclean 
 	git add $(SRC) Makefile README.md
 
 commit: add
