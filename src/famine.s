@@ -68,11 +68,11 @@
 section .text
 	global _start
 _start:
-	mov r14, [rsp + 8]										  ; saving argv0 to r14
+	mov r14, [rsp + 8]										 ; saving argv0 to r14
 	push rdx
 	push rsp
-	sub rsp, 5000											   ; reserving 5000 bytes
-	mov r15, rsp  
+	sub rsp, 5000											 ; reserving 5000 bytes
+	mov r15, rsp
 	mov byte [r15 + 550], 0										; 0 for /tmp/test, 1 for /tmp/test2
 
 	mov rax, SYS_PTRACE											; anti-debugging
