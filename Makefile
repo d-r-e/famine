@@ -10,9 +10,9 @@ $(OBJ): $(SRC)
 	$(NASM) -felf64 -g $(SRC)
 	
 clean:
-	rm -f $(OBJ)
-	rm -f /tmp/test/*
-	rm -f /tmp/test2/*
+	@rm -f $(OBJ)
+	@rm -f /tmp/test/*
+	@rm -f /tmp/test2/*
 
 fclean: clean
 	rm -f $(NAME)
@@ -41,20 +41,17 @@ s10: $(NAME)
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
 	strings /tmp/test2/* | grep --color=always "darodrig"
 	@strings /tmp/test2/* | grep --color=always "darodrig" | wc -l
-s20: $(NAME)
-	rm -rf /tmp/test/*
+s20: $(NAME) clean
 	cp $$(find /bin/ -type f | head -n20 ) /tmp/test
 	./$(NAME)
 	strings /tmp/test/* | grep --color=always "darodrig"
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
-s30: $(NAME)
-	rm -rf /tmp/test/*
+s30: $(NAME) clean
 	cp $$(find /bin/ -type f | head -n30 ) /tmp/test
 	./$(NAME)
 	strings /tmp/test/* | grep --color=always "darodrig"
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
-s40: $(NAME)
-	rm -rf /tmp/test/*
+s40: $(NAME) clean
 	cp $$(find /bin/ -type f | head -n40 ) /tmp/test
 	./$(NAME)
 	strings /tmp/test/* | grep --color=always "darodrig"
