@@ -34,8 +34,6 @@ s: $(NAME) clean
 ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
 s10: $(NAME)
-	rm -rf /tmp/test/*
-	rm -rf /tmp/test2/*
 	cp $$(find /bin/ -type f | head -n10 ) /tmp/test
 	cp $$(find /bin/ -type f | tail -n10 ) /tmp/test2
 	./$(NAME)
