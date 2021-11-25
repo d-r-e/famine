@@ -23,7 +23,7 @@ all: $(NAME)
 
 x: $(NAME)
 	./$(NAME)
-s: $(NAME)
+s: $(NAME) clean
 	mkdir -p /tmp/test
 	cp /bin/echo /tmp/test/echo
 	cp /bin/dir /tmp/test/
@@ -35,10 +35,14 @@ ss: s
 	binwalk -W /tmp/test/echo /bin/echo | less
 s10: $(NAME)
 	rm -rf /tmp/test/*
+	rm -rf /tmp/test2/*
 	cp $$(find /bin/ -type f | head -n10 ) /tmp/test
+	cp $$(find /bin/ -type f | tail -n10 ) /tmp/test2
 	./$(NAME)
 	strings /tmp/test/* | grep --color=always "darodrig"
 	@strings /tmp/test/* | grep --color=always "darodrig" | wc -l
+	strings /tmp/test2/* | grep --color=always "darodrig"
+	@strings /tmp/test2/* | grep --color=always "darodrig" | wc -l
 s20: $(NAME)
 	rm -rf /tmp/test/*
 	cp $$(find /bin/ -type f | head -n20 ) /tmp/test

