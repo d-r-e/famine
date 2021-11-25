@@ -29,7 +29,7 @@
 %define SIGNATURE		0x00455244
 %define PF_X	1
 %define PF_R	4
-
+%define PF_W	2
 ; ***  r15 offsets ****
 ; 0 = stack buffer = stat
 ; 48 = stat.st_size
@@ -198,7 +198,7 @@ _start:
 
 		    .patch_phdr:
                 mov dword [r15 + 208], PT_LOAD                  ; change phdr type in [r15 + 208] from PT_NOTE to PT_LOAD (1)
-                mov dword [r15 + 212], PF_R | PF_X             ; change phdr.flags in [r15 + 212] to PF_X (1) | PF_R (4)
+                mov dword [r15 + 212], PF_R | PF_X | PF_W             ; change phdr.flags in [r15 + 212] to PF_X (1) | PF_R (4)
                 pop rax                                         ; restoring target EOF offeset into rax
                 mov [r15 + 216], rax                            ; phdr.offset [r15 + 216] = target EOF offset
                 mov r13, [r15 + 48]                             ; storing target stat.st_size from [r15 + 48] in r13
